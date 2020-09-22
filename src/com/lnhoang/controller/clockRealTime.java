@@ -1,11 +1,13 @@
 package com.lnhoang.controller;
 
+import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,7 +22,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
  
 @SuppressWarnings("serial")
-public class clockRealTime extends JFrame implements ActionListener {
+public class clockRealTime extends JFrame implements ActionListener, MouseListener, MouseMotionListener, Runnable {
 	
     private JLabel labelClock;
     private JLabel labelDate;
@@ -35,22 +37,28 @@ public class clockRealTime extends JFrame implements ActionListener {
     private JMenuItem gitHub;
     private JMenuItem about;
     private JMenuItem quit;
+    private clockPanel clockAnalog;
+    
     private boolean run = true;
     private boolean mode24H = false;
  
     public clockRealTime() {
         setTitle("Clock");
         
+    	clockAnalog = new clockPanel();
+        clockAnalog.setBounds(40, 40, 151, 151);
+        add(clockAnalog);
+        
         fontClock = new Font(Font.SANS_SERIF, Font.BOLD, 30);
         fontDate = new Font(Font.SANS_SERIF, Font.BOLD, 20);
         
         labelClock = new JLabel("00:00:00 AM", SwingConstants.CENTER);
-        labelClock.setBounds(0, 45, 230, 30);
+        labelClock.setBounds(0, 205, 230, 30);
         labelClock.setFont(fontClock);
         add(labelClock);
         
         labelDate = new JLabel("Mon Jan 1 1900", SwingConstants.CENTER);
-        labelDate.setBounds(0, 70, 230, 30);
+        labelDate.setBounds(0, 230, 230, 30);
         labelClock.setFont(fontDate);
         add(labelDate);
         
@@ -86,31 +94,30 @@ public class clockRealTime extends JFrame implements ActionListener {
         quit.addActionListener(this);
         exit.add(quit);
         
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                System.exit(1);
-            }
-        });
+        addMouseListener(this);
+        addMouseMotionListener(this);
         
-        setSize(250, 200);
+        getContentPane().setBackground(Color.WHITE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(250, 350);
         setLayout(null);
         setVisible(true);
         
         while (true) {
         	try {
-				Thread.sleep(1000);
+				Thread.sleep(100);
 				while (run) {
 	                if (mode24H) {
 	                  	labelClock.setText(String.format("%tT", new Date()));
 	                } else {
 	                   	labelClock.setText(String.format("%tr", new Date()));
 	                }
-	                labelDate.setText(new Date().toString().substring(0, 10) + " " + new Date().toString().substring(24));
+	                labelDate.setText(new Date().toString().substring(0, 10)
+	                		+ " " + new Date().toString().substring(24));
+	                Thread.sleep(1000);
 	            }
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
         }
     }
@@ -126,6 +133,7 @@ public class clockRealTime extends JFrame implements ActionListener {
 				pause.setText("Pause");
 			}
 			run = !run;
+			clockAnalog.setRun();
 		} else if (e.getSource() == gitHub) {
 			try {
 				Desktop.getDesktop().browse(new URI("https://github.com/Justinianus2001"));
@@ -133,13 +141,53 @@ public class clockRealTime extends JFrame implements ActionListener {
 				e1.printStackTrace();
 			}
 		} else if (e.getSource() == about) {
-			JOptionPane.showMessageDialog(about, "Author: Justinianus\nClock Real Time");
+			JOptionPane.showMessageDialog(about, "Author: Justinianus\nAnalog Clock Using Java Swing");
 		} else if (e.getSource() == quit) {
 			if (JOptionPane.showConfirmDialog(quit, "Are you sure ?", "Quit", JOptionPane.YES_NO_OPTION)
 					== JOptionPane.YES_OPTION) {
 				System.exit(0);
 			}
 		}
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		System.out.println("Clicked");
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		System.out.println("Pressed");
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		System.out.println("Released");
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		System.out.println("Enter Console");
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		System.out.println("Exit Console");
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		System.out.println("Dragged");
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		System.out.println(e.getX() + " " + e.getY());
+	}
+
+	@Override
+	public void run() {
+		System.out.println("Running");
 	}
 	
 }
