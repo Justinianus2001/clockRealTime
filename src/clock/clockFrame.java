@@ -8,11 +8,20 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Calendar;
 import java.util.Date;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -36,17 +45,38 @@ public class clockFrame extends JFrame implements ActionListener, MouseListener,
 	private JMenu exit;
 	private JMenuItem changeMode;
 	private JMenuItem setupAlarm;
+	private JMenuItem checkAlarm;
 	private JMenuItem pause;
 	private JMenuItem gitHub;
 	private JMenuItem about;
 	private JMenuItem quit;
 	private clockPanel clockAnalog;
 
+	private AudioInputStream stream;
+	private AudioFormat format;
+	private DataLine.Info info;
+	private Clip clip;
+
 	private boolean running = true;
 	private boolean mode24H = false;
+	private boolean alarm = false;
+	private int alarmHour = 0;
+	private int alarmMin = 0;
 
 	public clockFrame() {
 		setTitle("Clock");
+
+		try {
+			stream = AudioSystem.getAudioInputStream(new File(System.getProperty("user.dir") + "\\alarm.wav"));
+			format = stream.getFormat();
+			info = new DataLine.Info(Clip.class, format);
+			clip = (Clip) AudioSystem.getLine(info);
+			clip.open(stream);
+		} catch (UnsupportedAudioFileException | IOException e) {
+			e.printStackTrace();
+		} catch (LineUnavailableException e) {
+			e.printStackTrace();
+		}
 
 		clockAnalog = new clockPanel();
 		clockAnalog.setBounds(40, 40, 150, 150);
@@ -78,6 +108,10 @@ public class clockFrame extends JFrame implements ActionListener, MouseListener,
 		setupAlarm = new JMenuItem("Setup Alarm");
 		setupAlarm.addActionListener(this);
 		option.add(setupAlarm);
+
+		checkAlarm = new JMenuItem("Check Alarm");
+		checkAlarm.addActionListener(this);
+		option.add(checkAlarm);
 
 		pause = new JMenuItem("Pause");
 		pause.addActionListener(this);
@@ -119,12 +153,31 @@ public class clockFrame extends JFrame implements ActionListener, MouseListener,
 		this.running = !this.running;
 	}
 
+	public void setAlarm() {
+		this.alarm = true;
+	}
+
+	public void setAlarmHour(int alarmHour) {
+		this.alarmHour = alarmHour;
+	}
+
+	public void setAlarmMin(int alarmMin) {
+		this.alarmMin = alarmMin;
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == changeMode) {
 			mode24H = !mode24H;
 		} else if (e.getSource() == setupAlarm) {
+			this.setVisible(false);
 			new alarmFrame();
+		} else if (e.getSource() == checkAlarm) {
+			if (alarm) {
+				JOptionPane.showMessageDialog(checkAlarm, "Alarm setup at " + alarmHour + "H" + alarmMin + "M");
+			} else {
+				JOptionPane.showMessageDialog(checkAlarm, "No alarm setup !");
+			}
 		} else if (e.getSource() == pause) {
 			if (pause.getText().equals("Pause")) {
 				pause.setText("Continue");
@@ -190,6 +243,20 @@ public class clockFrame extends JFrame implements ActionListener, MouseListener,
 			try {
 				Thread.sleep(100);
 				while (running) {
+					if (alarm && alarmHour == Calendar.getInstance().get(Calendar.HOUR)
+							&& alarmMin == Calendar.getInstance().get(Calendar.MINUTE)) {
+						clip.start();
+						if (JOptionPane.showConfirmDialog(this,
+								"Ring Ring Ring !!!\nYes to set alarm 5 minutes later, No to turn off", "Alarm !!!",
+								JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+							alarmMin = Calendar.getInstance().get(Calendar.MINUTE) + 5;
+							alarmHour = Calendar.getInstance().get(Calendar.HOUR) + alarmMin / 60;
+							alarmMin %= 60;
+						} else {
+							alarm = false;
+						}
+						clip.close();
+					}
 					if (mode24H) {
 						labelClock.setText(String.format("%tT", new Date()));
 					} else {

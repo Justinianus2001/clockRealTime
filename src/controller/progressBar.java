@@ -41,7 +41,7 @@ public class progressBar extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == timer) {
 			int curProgress = progress.getValue();
-			
+
 			timer.setDelay(new Random().nextInt(50));
 
 			if (curProgress >= complete) {
