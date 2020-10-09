@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Calendar;
 import java.util.Date;
 
 import javax.sound.sampled.AudioFormat;
@@ -65,18 +64,6 @@ public class clockFrame extends JFrame implements ActionListener, MouseListener,
 
 	public clockFrame() {
 		setTitle("Clock");
-
-		try {
-			stream = AudioSystem.getAudioInputStream(new File(System.getProperty("user.dir") + "\\alarm.wav"));
-			format = stream.getFormat();
-			info = new DataLine.Info(Clip.class, format);
-			clip = (Clip) AudioSystem.getLine(info);
-			clip.open(stream);
-		} catch (UnsupportedAudioFileException | IOException e) {
-			e.printStackTrace();
-		} catch (LineUnavailableException e) {
-			e.printStackTrace();
-		}
 
 		clockAnalog = new clockPanel();
 		clockAnalog.setBounds(40, 40, 150, 150);
@@ -188,7 +175,7 @@ public class clockFrame extends JFrame implements ActionListener, MouseListener,
 			clockAnalog.setRunning();
 		} else if (e.getSource() == gitHub) {
 			try {
-				Desktop.getDesktop().browse(new URI("https://github.com/Justinianus2001"));
+				Desktop.getDesktop().browse(new URI("https://j2c.cc/c00d0eaa"));
 			} catch (IOException | URISyntaxException E) {
 				E.printStackTrace();
 			}
@@ -237,33 +224,51 @@ public class clockFrame extends JFrame implements ActionListener, MouseListener,
 		System.out.println(e.getX() + " " + e.getY());
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void run() {
+		try {
+			stream = AudioSystem.getAudioInputStream(new File(System.getProperty("user.dir") + "\\alarm.wav"));
+			format = stream.getFormat();
+			info = new DataLine.Info(Clip.class, format);
+			clip = (Clip) AudioSystem.getLine(info);
+			clip.open(stream);
+		} catch (UnsupportedAudioFileException | IOException e) {
+			e.printStackTrace();
+		} catch (LineUnavailableException e) {
+			e.printStackTrace();
+		}
+
 		while (true) {
 			try {
 				Thread.sleep(100);
 				while (running) {
-					if (alarm && alarmHour == Calendar.getInstance().get(Calendar.HOUR)
-							&& alarmMin == Calendar.getInstance().get(Calendar.MINUTE)) {
+					Date date = new Date();
+					if (alarm && alarmHour == date.getHours() && alarmMin == date.getMinutes()) {
+						this.setAlwaysOnTop(true);
+						this.toFront();
 						clip.start();
 						if (JOptionPane.showConfirmDialog(this,
 								"Ring Ring Ring !!!\nYes to set alarm 5 minutes later, No to turn off", "Alarm !!!",
 								JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-							alarmMin = Calendar.getInstance().get(Calendar.MINUTE) + 5;
-							alarmHour = Calendar.getInstance().get(Calendar.HOUR) + alarmMin / 60;
+							alarmMin = date.getMinutes() + 5;
+							alarmHour = date.getHours() + alarmMin / 60;
 							alarmMin %= 60;
 						} else {
 							alarm = false;
 						}
 						clip.close();
+						this.setAlwaysOnTop(false);
 					}
+
 					if (mode24H) {
-						labelClock.setText(String.format("%tT", new Date()));
+						labelClock.setText(String.format("%tT", date));
 					} else {
-						labelClock.setText(String.format("%tr", new Date()));
+						labelClock.setText(String.format("%tr", date));
 					}
-					labelDate.setText(
-							new Date().toString().substring(0, 10) + " " + new Date().toString().substring(24));
+
+					String today = date.toString();
+					labelDate.setText(today.substring(0, 10) + " " + today.substring(24));
 					Thread.sleep(1000);
 				}
 			} catch (InterruptedException e) {
