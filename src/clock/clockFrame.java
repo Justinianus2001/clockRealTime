@@ -249,7 +249,7 @@ public class clockFrame extends JFrame implements ActionListener, MouseListener,
 						this.toFront();
 						clip.start();
 						if (JOptionPane.showConfirmDialog(this,
-								"Ring Ring Ring !!!\nYes to set alarm 5 minutes later, No to turn off", "Alarm !!!",
+								"Ring Ring Ring !!!\nSnooze ?", "Alarm !!!",
 								JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 							alarmMin = date.getMinutes() + 5;
 							alarmHour = date.getHours() + alarmMin / 60;

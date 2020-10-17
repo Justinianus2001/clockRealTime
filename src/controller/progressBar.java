@@ -49,7 +49,6 @@ public class progressBar extends JFrame implements ActionListener {
 				this.setVisible(false);
 				dispose();
 				new clockFrame();
-//				return;
 			}
 
 			progress.setValue(curProgress + 1);
