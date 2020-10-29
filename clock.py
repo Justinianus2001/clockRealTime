@@ -3,7 +3,7 @@ import os
 
 try:
 	from py4j.java_gateway import JavaGateway, Py4JNetworkError
-except:
+except ImportError:
 	os.system('start cmd /c pip3 install py4j')
 	from py4j.java_gateway import JavaGateway, Py4JNetworkError
 

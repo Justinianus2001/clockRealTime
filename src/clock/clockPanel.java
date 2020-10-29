@@ -85,7 +85,6 @@ public class clockPanel extends JPanel implements Runnable {
 	public void run() {
 		while (true) {
 			try {
-				Thread.sleep(100);
 				while (running) {
 					curSecond = Calendar.getInstance().get(Calendar.SECOND);
 					curMinute = Calendar.getInstance().get(Calendar.MINUTE);

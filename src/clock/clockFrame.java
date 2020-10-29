@@ -29,6 +29,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
+//import org.python.util.PythonInterpreter;
+
 import alarm.alarmFrame;
 
 @SuppressWarnings("serial")
@@ -45,6 +47,7 @@ public class clockFrame extends JFrame implements ActionListener, MouseListener,
 	private JMenuItem changeMode;
 	private JMenuItem setupAlarm;
 	private JMenuItem checkAlarm;
+	private JMenuItem timer;
 	private JMenuItem pause;
 	private JMenuItem gitHub;
 	private JMenuItem about;
@@ -99,6 +102,10 @@ public class clockFrame extends JFrame implements ActionListener, MouseListener,
 		checkAlarm = new JMenuItem("Check Alarm");
 		checkAlarm.addActionListener(this);
 		option.add(checkAlarm);
+
+		timer = new JMenuItem("Timer");
+		timer.addActionListener(this);
+		option.add(timer);
 
 		pause = new JMenuItem("Pause");
 		pause.addActionListener(this);
@@ -165,6 +172,16 @@ public class clockFrame extends JFrame implements ActionListener, MouseListener,
 			} else {
 				JOptionPane.showMessageDialog(checkAlarm, "No alarm setup !");
 			}
+		} else if (e.getSource() == timer) {
+//			PythonInterpreter python = new PythonInterpreter();
+//			python.execfile("timer.py");
+//			python.close();
+			try {
+				Runtime.getRuntime().exec("python3 timer.py");
+			} catch (IOException E) {
+				System.out.println("Can't find timer.py !");
+				E.printStackTrace();
+			}
 		} else if (e.getSource() == pause) {
 			if (pause.getText().equals("Pause")) {
 				pause.setText("Continue");
@@ -175,7 +192,7 @@ public class clockFrame extends JFrame implements ActionListener, MouseListener,
 			clockAnalog.setRunning();
 		} else if (e.getSource() == gitHub) {
 			try {
-				Desktop.getDesktop().browse(new URI("https://j2c.cc/c00d0eaa"));
+				Desktop.getDesktop().browse(new URI("https://github.com/Justinianus2001"));
 			} catch (IOException | URISyntaxException E) {
 				E.printStackTrace();
 			}
@@ -241,15 +258,13 @@ public class clockFrame extends JFrame implements ActionListener, MouseListener,
 
 		while (true) {
 			try {
-				Thread.sleep(100);
 				while (running) {
 					Date date = new Date();
 					if (alarm && alarmHour == date.getHours() && alarmMin == date.getMinutes()) {
 						this.setAlwaysOnTop(true);
 						this.toFront();
 						clip.start();
-						if (JOptionPane.showConfirmDialog(this,
-								"Ring Ring Ring !!!\nSnooze ?", "Alarm !!!",
+						if (JOptionPane.showConfirmDialog(this, "Ring Ring Ring !!!\nSnooze ?", "Alarm !!!",
 								JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 							alarmMin = date.getMinutes() + 5;
 							alarmHour = date.getHours() + alarmMin / 60;
